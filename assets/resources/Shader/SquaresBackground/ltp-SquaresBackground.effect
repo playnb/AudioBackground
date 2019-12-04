@@ -1,0 +1,144 @@
+// Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.  
+
+CCEffect %{
+  techniques:
+  - passes:
+    - vert: vs
+      frag: fs
+      blendState:
+        targets:
+        - blend: true
+      rasterizerState:
+        cullMode: none
+      properties:
+        texture: { value: white }
+        uChannel0: { value: white }
+        uChannel1: { value: white }
+        uChannel2: { value: white }
+        uChannel3: { value: white }
+        
+        alphaThreshold: { value: 0.5 }
+        uResolution: { value: [0, 0, 0, 0] }
+        uMouse: { value: [0, 0, 0, 0] }
+        uTime: { value: 0.0 }
+
+}%
+
+
+CCProgram vs %{
+  precision highp float;
+
+  #include <cc-global>
+  #include <cc-local>
+
+  in vec3 a_position;
+  in vec4 a_color;
+  out vec4 v_color;
+
+  #if USE_TEXTURE
+  in vec2 a_uv0;
+  out vec2 v_uv0;
+  #endif
+
+  void main () {
+    vec4 pos = vec4(a_position, 1);
+
+    #if CC_USE_MODEL
+    pos = cc_matViewProj * cc_matWorld * pos;
+    #else
+    pos = cc_matViewProj * pos;
+    #endif
+
+    #if USE_TEXTURE
+    v_uv0 = a_uv0;
+    #endif
+
+    v_color = a_color;
+
+    gl_Position = pos;
+  }
+}%
+
+
+CCProgram fs %{
+//////////////////////////////////////////////////////////////////////////////////////////////
+  precision highp float;
+  
+  #include <alpha-test>
+
+  in vec4 v_color;
+
+  #if USE_TEXTURE
+  in vec2 v_uv0;
+  uniform sampler2D texture;
+  #endif
+
+  uniform LTP {
+    vec4 uResolution;
+    vec4 uMouse;
+    float uTime;
+    sampler2D uChannel0;
+    sampler2D uChannel1;
+    sampler2D uChannel2;
+    sampler2D uChannel3;
+  }
+
+  #define iChannel0 uChannel0
+  #define iChannel1 uChannel1
+  #define iChannel2 uChannel2
+  #define iChannel3 uChannel3
+  #define iResolution uResolution
+  #define iTime uTime
+  #define iMouse uMouse
+
+float _round(float f){
+    return floor(step(0.5001, fract(f))+f);
+}
+
+vec2 _round(vec2 f){
+    return vec2(_round(f.x),_round(f.y));
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+//https://www.shadertoy.com/view/XlsfzH
+//--------------------------------------------------------------------------------------------
+#define rot(a) mat2(cos(a), -sin(a), sin(a), cos(a)) // col1a col1b col2a col2b
+const float gridWidth = 0.43;
+const vec3 bgColor = vec3(0.01, 0.116, 0.12);
+
+vec3 hue( float c )
+{
+    return smoothstep(0.,1., abs(mod(c*6.+vec3(0,4,2), 3.)-0.31)-1.);
+}
+
+void mainImage( out vec4 fragColor, in vec2 fragCoord )
+{
+    vec2 uv = (2. * fragCoord - iResolution.xy) / iResolution.y;
+    float threshold = .03;
+    vec2 node = uv / gridWidth;
+    //no round function?
+    node = _round(node) * gridWidth;
+    
+    vec4 wav = texture(iChannel0, vec2(0.1, 0.0));
+     
+    float sizeNum = 1.5*wav.x;//sin((-iTime * 1.5  + pow(length(node), 1.2)) * 1.5)*wav.x;
+    vec2 to = uv - node;
+    to /= abs(sizeNum) + .4;
+    to *= rot((iTime * 15.) * .15);
+    float d = length(max(abs(to) - .050, 0.));
+    
+    vec3 col = .1 + .5 * hue(sizeNum / 6.);
+    
+    float val = smoothstep(threshold + .01, threshold, d);
+    fragColor.rgb = mix( bgColor, col, val);
+    fragColor.a=0.5;
+}
+//--------------------------------------------------------------------------------------------
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+  void main () {
+    mainImage(gl_FragColor, v_uv0.xy*iResolution.xy);
+    //gl_FragColor = vec4(0.5,0.5,0.5, 1.0);
+  }
+//////////////////////////////////////////////////////////////////////////////////////////////
+}%

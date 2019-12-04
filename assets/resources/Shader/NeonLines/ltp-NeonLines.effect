@@ -1,0 +1,146 @@
+// Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.  
+
+CCEffect %{
+  techniques:
+  - passes:
+    - vert: vs
+      frag: fs
+      blendState:
+        targets:
+        - blend: true
+      rasterizerState:
+        cullMode: none
+      properties:
+        texture: { value: white }
+        uChannel0: { value: white }
+        uChannel1: { value: white }
+        uChannel2: { value: white }
+        uChannel3: { value: white }
+        
+        alphaThreshold: { value: 0.5 }
+        uResolution: { value: [0, 0, 0, 0] }
+        uMouse: { value: [0, 0, 0, 0] }
+        uTime: { value: 0.0 }
+
+}%
+
+
+CCProgram vs %{
+  precision highp float;
+
+  #include <cc-global>
+  #include <cc-local>
+
+  in vec3 a_position;
+  in vec4 a_color;
+  out vec4 v_color;
+
+  #if USE_TEXTURE
+  in vec2 a_uv0;
+  out vec2 v_uv0;
+  #endif
+
+  void main () {
+    vec4 pos = vec4(a_position, 1);
+
+    #if CC_USE_MODEL
+    pos = cc_matViewProj * cc_matWorld * pos;
+    #else
+    pos = cc_matViewProj * pos;
+    #endif
+
+    #if USE_TEXTURE
+    v_uv0 = a_uv0;
+    #endif
+
+    v_color = a_color;
+
+    gl_Position = pos;
+  }
+}%
+
+
+CCProgram fs %{
+//////////////////////////////////////////////////////////////////////////////////////////////
+  precision highp float;
+  
+  #include <alpha-test>
+
+  in vec4 v_color;
+
+  #if USE_TEXTURE
+  in vec2 v_uv0;
+  uniform sampler2D texture;
+  #endif
+
+  uniform LTP {
+    vec4 uResolution;
+    vec4 uMouse;
+    float uTime;
+    sampler2D uChannel0;
+    sampler2D uChannel1;
+    sampler2D uChannel2;
+    sampler2D uChannel3;
+  }
+
+  #define iChannel0 uChannel0
+  #define iChannel1 uChannel1
+  #define iChannel2 uChannel2
+  #define iChannel3 uChannel3
+  #define iResolution uResolution
+  #define iTime uTime
+  #define iMouse uMouse
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+//https://www.shadertoy.com/view/ls3Sz4
+//--------------------------------------------------------------------------------------------
+float hash(int x) { return fract(sin(float(x))*7.847); } 
+
+float dSegment(vec2 a, vec2 b, vec2 c)
+{
+    vec2 ab = b-a;
+    vec2 ac = c-a;
+
+    float h = clamp(dot(ab, ac)/dot(ab, ab), 0., 1.);
+    vec2 point = a+ab*h;
+    return length(c-point);
+}
+
+vec3 drawLine(vec3 color, vec2 uv, float wave, int i){
+	vec2 a = vec2(hash(i)*2.-1., hash(i+1)*2.-1.);
+ 	vec2 b = vec2(hash(10*i+1)*2.-1., hash(11*i+2)*2.-1.);
+ 	vec3 lineColor = vec3(hash(10+i), hash(18+i*3), hash(5+i*10));
+ 	float speed = b.y*0.15;
+ 	float size = (0.005 + 0.3*hash(5+i*i*2)) + (0.5+0.5*sin(a.y*5.+0.0*speed))*0.1;
+        
+ 	a += vec2(sin(a.x*20.+iTime*speed), sin(a.y*15.+iTime*0.4*speed)*0.5);
+ 	b += vec2(b.x*5.+cos(iTime*speed), cos(b.y*10.+iTime*2.0*speed)*0.5);
+ 	float dist = dSegment(a, b, uv);
+        
+ 	float soundWave = 1.5*wave;
+ 	color += mix(lineColor, vec3(0.), smoothstep(0., 1.0, pow(dist/size, soundWave*(0.5+0.5)*0.20) ));
+	return color;
+}
+    
+#define N 10
+void mainImage( out vec4 fragColor, in vec2 fragCoord ){
+	vec2 uv = (fragCoord.xy*2.-iResolution.xy) / iResolution.yy;
+    
+    vec3 color = vec3(0.);
+    color = mix(vec3(0.325, 0.431, 0.364), color, abs(uv.x)*0.25);
+    
+    for(int i=0; i < N; ++i)    {
+        color = drawLine(color, uv, texture(iChannel0, vec2(float(i)/float(N), 0.0)).x, i);
+    }
+    
+	fragColor = vec4(color,1.0);
+}
+//--------------------------------------------------------------------------------------------
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+  void main () {
+    mainImage(gl_FragColor, v_uv0.xy*iResolution.xy);
+    //gl_FragColor = vec4(bgColor, 1.0);
+  }
+//////////////////////////////////////////////////////////////////////////////////////////////
+}%
