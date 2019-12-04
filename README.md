@@ -12,4 +12,4 @@
 - AudioManger: WebAudio 封装
 - CustomRenderComponent: 自定义渲染组件,也可用 cc.Sprite 代替
 - CustomShaderUpdate: Shader 的 uniform 数据更新组件
-- ltp-NeonLines,ltp-SquaresBackground: shader改编自shadertroy.com,出处见effect文件内说明
+- ltp-NeonLines,ltp-SquaresBackground: shader改编自[shadertoy.com](www.shadertoy.com),出处见effect文件内说明
