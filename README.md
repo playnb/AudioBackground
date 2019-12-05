@@ -149,4 +149,4 @@ Web Audio API 使用户可以在音频上下文(AudioContext)中进行音频操�
 - AudioManger: WebAudio 封装
 - CustomRenderComponent: 自定义渲染组件，也可用 cc.Sprite 代替
 - CustomShaderUpdate: 自定义Shader数据更新组件
-- shader(ltp-NeonLines，ltp-SquaresBackground)改编自[shadertoy.com](www.shadertoy.com)，出处见 effect 文件内说明
+- shader(ltp-NeonLines，ltp-SquaresBackground)改编自[shadertoy.com](https://www.shadertoy.com)，出处见 effect 文件内说明
