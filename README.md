@@ -84,7 +84,6 @@ Web Audio API 使用户可以在音频上下文(AudioContext)中进行音频操�
         if (self._touchPlay) {
             return
         }
-        cc.log("AudioContext:Start===================>")
         self._touchPlay = true
         self._bufferSourceList.forEach((s: AudioBufferSourceNode) => {
             s.start()
