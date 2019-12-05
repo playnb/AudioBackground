@@ -1,12 +1,12 @@
 # AudioBackground for CocosCreator
 
-### 随音乐律动的背景 for CocosCreator
+#### 随音乐律动的背景 for CocosCreator
 
 #### [在线示例](https://ltp.gitee.io/gym/cocos-creator/ShaderSample/wave-show/web-mobile/index.html)
 
 ---
 
-# 制作随音乐律动的背景
+## 制作随音乐律动的背景
 
 ![Image](https://github.com/playnb/AudioBackground/blob/master/images/title.png)
 
