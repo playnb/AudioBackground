@@ -8,13 +8,13 @@
 
 # 制作随音乐律动的背景
 
-[Image](https://github.com/playnb/AudioBackground/blob/master/images/title.png)
+![Image](https://github.com/playnb/AudioBackground/blob/master/images/title.png)
 
 Web Audio API 提供了在 Web 上控制音频的一个非常有效通用的系统，允许开发者来自选音频源，对音频添加特效，使音频可视化，添加空间效果 （如平移），等等。
 
 Web Audio API 使用户可以在音频上下文(AudioContext)中进行音频操作，具有模块化路由的特点。在音频节点上操作进行基础的音频， 它们连接在一起构成音频路由图。即使在单个上下文中也支持多源，尽管这些音频源具有多种不同类型通道布局。这种模块化设计提供了灵活创建动态效果的复合音频的方法。
 
-[Image](https://github.com/playnb/AudioBackground/blob/master/images/audioContext.png)
+![Image](https://github.com/playnb/AudioBackground/blob/master/images/audioContext.png)
 
 对于声音可视化表现，我们主要使用 AnalyserNode。AnalyserNode 接口表示了一个可以提供实时频域和时域分析信息的节点。它是一个不对音频流作任何改动的 AudioNode，同时允许你获取和处理它生成的数据，从而创建音频可视化。
 
@@ -50,7 +50,7 @@ Web Audio API 使用户可以在音频上下文(AudioContext)中进行音频操�
 
 其中 AnalyserNode 是负责对采样帧的音频信号做快速傅里叶变换得到频域数据，是我们可视化数据的来源.
 
-[AnalyserNode](https://github.com/playnb/AudioBackground/blob/master/images/analyserNode.png)
+![AnalyserNode](https://github.com/playnb/AudioBackground/blob/master/images/analyserNode.png)
 
 - AnalyserNode.fftSize: 代表了用于计算频域信号时使用的 FFT 的窗口大小，这个数值决定我们每帧可以从节点获取多少数据
 - AnalyserNode.frequencyBinCount: 代表用于可视化的数据值的数量(为 fftsize 的一半)，我们用这个值初始化可视化数据缓冲
